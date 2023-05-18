@@ -12,6 +12,9 @@ namespace HueFesAPI.Data
         public int TypeInOff { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public int EventTypeId { get; set; }
+        [ForeignKey("EventTypeId")]
+        public EventType EventType { get; set; }
         public int TicketTypeId { get; set; }
         [ForeignKey("TicketTypeId")]
         public TicketType TicketType { get; set; }
