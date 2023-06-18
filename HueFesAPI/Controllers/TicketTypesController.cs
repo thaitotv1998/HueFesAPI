@@ -7,11 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HueFesAPI;
 using HueFesAPI.Data;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace HueFesAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class TicketTypesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

@@ -1,17 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HueFesAPI;
 using HueFesAPI.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HueFesAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
+
     public class RolesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -27,24 +28,24 @@ namespace HueFesAPI.Controllers
         {
           if (_context.Role == null)
           {
-              return NotFound();
+              return NotFound("Role is null");
           }
             return await _context.Role.ToListAsync();
         }
 
         // GET: api/Roles/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Role>> GetRole(int id)
+        [HttpGet("name")]
+        public async Task<ActionResult<Role>> GetRoleByName(string name)
         {
-          if (_context.Role == null)
-          {
-              return NotFound();
-          }
-            var role = await _context.Role.FindAsync(id);
+            if (_context.Role == null)
+            {
+                return NotFound();
+            }
+            var role = await _context.Role.FirstOrDefaultAsync(r => r.RoleName == name);
 
             if (role == null)
             {
-                return NotFound();
+                return NotFound("Role not found");
             }
 
             return role;
@@ -53,15 +54,14 @@ namespace HueFesAPI.Controllers
         // PUT: api/Roles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRole(int id, Role role)
+        public async Task<IActionResult> PutRole(Guid id, Role role)
         {
-            if (id != role.Id)
+            if (id != role.RoleId)
             {
-                return BadRequest();
+                return BadRequest("Role not found");
             }
 
             _context.Entry(role).State = EntityState.Modified;
-
             try
             {
                 await _context.SaveChangesAsync();
@@ -78,7 +78,7 @@ namespace HueFesAPI.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok("Role updated!");
         }
 
         // POST: api/Roles
@@ -88,12 +88,12 @@ namespace HueFesAPI.Controllers
         {
           if (_context.Role == null)
           {
-              return Problem("Entity set 'ApplicationDbContext.Role'  is null.");
+              return Ok("Role is null");
           }
             _context.Role.Add(role);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetRole", new { id = role.Id }, role);
+            return CreatedAtAction("GetRole", new { id = role.RoleId }, role);
         }
 
         // DELETE: api/Roles/5
@@ -107,18 +107,18 @@ namespace HueFesAPI.Controllers
             var role = await _context.Role.FindAsync(id);
             if (role == null)
             {
-                return NotFound();
+                return NotFound("Role not found");
             }
 
             _context.Role.Remove(role);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok("Role deleted!");
         }
 
-        private bool RoleExists(int id)
+        private bool RoleExists(Guid id)
         {
-            return (_context.Role?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Role?.Any(e => e.RoleId == id)).GetValueOrDefault();
         }
     }
 }

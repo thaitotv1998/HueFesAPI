@@ -7,11 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HueFesAPI;
 using HueFesAPI.Data;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace HueFesAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class EventsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -50,6 +53,22 @@ namespace HueFesAPI.Controllers
             return @event;
         }
 
+        [HttpGet("name")]
+        public async Task<ActionResult<Event>> GetEventByName(string name)
+        {
+            if (_context.Event == null)
+            {
+                return NotFound();
+            }
+            var @event = await _context.Event.FirstOrDefaultAsync(e => e.Name == name);
+
+            if (@event == null)
+            {
+                return NotFound();
+            }
+
+            return @event;
+        }
         // PUT: api/Events/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
